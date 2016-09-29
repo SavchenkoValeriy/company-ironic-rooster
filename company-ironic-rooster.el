@@ -1,12 +1,12 @@
-;;; company-irony.el --- company-mode completion back-end for irony-mode  -*- lexical-binding: t -*-
+;;; company-ironic-rooster.el --- company-mode completion back-end for ironic-rooster-mode  -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2014  Guillaume Papin
 
 ;; Author: Guillaume Papin <guillaume.papin@epitech.eu>
 ;; Keywords: convenience
 ;; Version: 0.1.2-cvs
-;; URL: https://github.com/Sarcasm/company-irony/
-;; Package-Requires: ((emacs "24.1") (company "0.8.0") (irony "0.2.0") (cl-lib "0.5"))
+;; URL: https://github.com/Sarcasm/company-ironic-rooster/
+;; Package-Requires: ((emacs "24.1") (company "0.8.0") (ironic-rooster "0.2.0") (cl-lib "0.5"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -26,76 +26,76 @@
 ;; Usage:
 ;;
 ;;     (eval-after-load 'company
-;;       '(add-to-list 'company-backends 'company-irony))
+;;       '(add-to-list 'company-backends 'company-ironic-rooster))
 
 ;;; Code:
 
-(require 'irony-completion)
+(require 'ironic-rooster-completion)
 
 (require 'company)
 (require 'company-template)
 
 (require 'cl-lib)
 
-(defgroup company-irony nil
-  "Company-mode completion back-end for Irony."
+(defgroup company-ironic-rooster nil
+  "Company-mode completion back-end for Ironic-Rooster."
   :group 'company
-  :group 'irony)
+  :group 'ironic-rooster)
 
-(defcustom company-irony-ignore-case nil
+(defcustom company-ironic-rooster-ignore-case nil
   "Non-nil to ignore case when collecting completion candidates."
   :type 'boolean)
 
-(defsubst company-irony--irony-candidate (candidate)
-  (get-text-property 0 'company-irony candidate))
+(defsubst company-ironic-rooster--ironic-rooster-candidate (candidate)
+  (get-text-property 0 'company-ironic-rooster candidate))
 
-(defun company-irony-prefix ()
-  (let ((symbol-start (irony-completion-beginning-of-symbol)))
+(defun company-ironic-rooster-prefix ()
+  (let ((symbol-start (ironic-rooster-completion-beginning-of-symbol)))
     (if symbol-start
         (let ((prefix (buffer-substring-no-properties symbol-start (point))))
           (save-excursion
             (goto-char symbol-start)
-            (if (irony-completion-at-trigger-point-p)
+            (if (ironic-rooster-completion-at-trigger-point-p)
                 (cons prefix t)
               prefix)))
       'stop)))
 
-(defun company-irony--filter-candidates (prefix candidates)
+(defun company-ironic-rooster--filter-candidates (prefix candidates)
   (cl-loop for candidate in candidates
            when (string-prefix-p prefix (car candidate)
-                                 company-irony-ignore-case)
-           collect (propertize (car candidate) 'company-irony candidate)))
+                                 company-ironic-rooster-ignore-case)
+           collect (propertize (car candidate) 'company-ironic-rooster candidate)))
 
-(defun company-irony--candidates-async (prefix callback)
+(defun company-ironic-rooster--candidates-async (prefix callback)
   (funcall callback
-           (company-irony--filter-candidates prefix
-                                             (irony-completion-candidates))))
+           (company-ironic-rooster--filter-candidates prefix
+                                             (ironic-rooster-completion-candidates))))
 
-(defun company-irony--candidates (prefix)
-  (if (irony-completion-candidates-available-p)
-      (company-irony--filter-candidates prefix (irony-completion-candidates))
+(defun company-ironic-rooster--candidates (prefix)
+  (if (ironic-rooster-completion-candidates-available-p)
+      (company-ironic-rooster--filter-candidates prefix (ironic-rooster-completion-candidates))
     (cons :async
           (lambda (callback)
-            (irony-completion-candidates-async
+            (ironic-rooster-completion-candidates-async
              (lambda () ;; closure, lexically bound
-               (company-irony--candidates-async prefix callback)))))))
+               (company-ironic-rooster--candidates-async prefix callback)))))))
 
-(defun company-irony--annotation (candidate)
+(defun company-ironic-rooster--annotation (candidate)
   (concat
-   (irony-completion-annotation candidate)
-   (let ((type (irony-completion-type candidate)))
+   (ironic-rooster-completion-annotation candidate)
+   (let ((type (ironic-rooster-completion-type candidate)))
      (when (not (zerop (length type)))
        (concat " -> " type)))))
 
-(defun company-irony--post-completion (candidate)
+(defun company-ironic-rooster--post-completion (candidate)
   ;; This check is necessary because Company triggers a 'post-completion even if
   ;; the candidate has just been typed without relying on the completion, but it
   ;; doesn't provide the full candidate information.
   (when candidate
     (let ((point-before-post-complete (point)))
-      (if (irony-snippet-available-p)
-          (irony-completion-post-complete candidate)
-        (let ((str (irony-completion-post-comp-str candidate)))
+      (if (ironic-rooster-snippet-available-p)
+          (ironic-rooster-completion-post-complete candidate)
+        (let ((str (ironic-rooster-completion-post-comp-str candidate)))
           (insert str)
           (company-template-c-like-templatify str)))
       ;; Here we set this-command to a `self-insert-command' so that company may
@@ -114,24 +114,24 @@
         (setq this-command 'self-insert-command)))))
 
 ;;;###autoload
-(defun company-irony (command &optional arg &rest ignored)
+(defun company-ironic-rooster (command &optional arg &rest ignored)
   (interactive (list 'interactive))
   (cl-case command
-    (interactive (company-begin-backend 'company-irony))
-    (prefix (and irony-mode (company-irony-prefix)))
-    (candidates (company-irony--candidates arg))
-    (annotation (company-irony--annotation
-                 (company-irony--irony-candidate arg)))
-    (meta (irony-completion-brief
-           (company-irony--irony-candidate arg)))
-    (post-completion (company-irony--post-completion
-                      (company-irony--irony-candidate arg)))
-    (ignore-case company-irony-ignore-case)
+    (interactive (company-begin-backend 'company-ironic-rooster))
+    (prefix (and ironic-rooster-mode (company-ironic-rooster-prefix)))
+    (candidates (company-ironic-rooster--candidates arg))
+    (annotation (company-ironic-rooster--annotation
+                 (company-ironic-rooster--ironic-rooster-candidate arg)))
+    (meta (ironic-rooster-completion-brief
+           (company-ironic-rooster--ironic-rooster-candidate arg)))
+    (post-completion (company-ironic-rooster--post-completion
+                      (company-ironic-rooster--ironic-rooster-candidate arg)))
+    (ignore-case company-ironic-rooster-ignore-case)
     (sorted t)))
 
 ;;;###autoload
-(defun company-irony-setup-begin-commands ()
-  "Include irony trigger commands to `company-begin-commands'.
+(defun company-ironic-rooster-setup-begin-commands ()
+  "Include ironic-rooster trigger commands to `company-begin-commands'.
 
 This allow completion to be automatically triggered after member
 accesses (obj.|, obj->|, ...).
@@ -141,10 +141,10 @@ include these commands by default."
   (if (listp company-begin-commands)
       (set (make-local-variable 'company-begin-commands)
            (delete-dups
-            (append company-begin-commands irony-completion-trigger-commands)))
-    (display-warning 'company-irony
-                     "`company-irony-setup-begin-commands' expects \
+            (append company-begin-commands ironic-rooster-completion-trigger-commands)))
+    (display-warning 'company-ironic-rooster
+                     "`company-ironic-rooster-setup-begin-commands' expects \
 `company-begin-commands' to be a list!")))
 
-(provide 'company-irony)
-;;; company-irony.el ends here
+(provide 'company-ironic-rooster)
+;;; company-ironic-rooster.el ends here
